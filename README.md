@@ -38,6 +38,9 @@ Asteroids is a game where the player controls a spaceship to shoot and destroy a
     - this.scoreDisplay  
     - this.finalScore  
     - this.spaceship  
+    - this.handleKeyDown
+    - this.handleKeyUp
+    - this.gameLoop
 
 - start()  
 - gameLoop()  
@@ -46,8 +49,8 @@ Asteroids is a game where the player controls a spaceship to shoot and destroy a
 - spawnAsteroid()  
 - updateAsteroids()  
 - checkCollisions()  
-- handleKeyDown(event)  
-- handleKeyUp(event)  
+- handleKeyDown(e)  
+- handleKeyUp(e)  
 - gameOver()  
 
 ## **game-object.js**
@@ -56,6 +59,7 @@ Asteroids is a game where the player controls a spaceship to shoot and destroy a
     - this.x  
     - this.y  
     - this.element  
+    - this.element.id
 
 - updatePosition()  
 - remove()  
@@ -75,31 +79,24 @@ Asteroids is a game where the player controls a spaceship to shoot and destroy a
 
 ## **spaceship.js**
 - **Spaceship()**  
-    - this.x  
-    - this.y  
     - this.angle  
-    - this.speedX  
-    - this.speedY  
-    - this.rotationSpeed  
-    - this.thrustPower  
-    - this.projectiles  
+    - this.width
+    - this.height  
+    - this.speed  
+    - this.maxSpeed    
 
-- draw()  
 - rotate(direction)  
 - thrust()  
-- shoot(id)  
-- update()  
-- checkBounds()  
+- updatePosition()
+- shoot(projectileId)  
 - reset()  
 
 ## **projectile.js**
 - **Projectile()**  
-    - this.x  
-    - this.y  
-    - this.angle  
+    - this.directionX 
+    - this.directionY
     - this.speed  
-    - this.active  
 
 - update()  
-- remove()  
+- updatePosition()  
 
