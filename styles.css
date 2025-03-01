@@ -46,15 +46,34 @@ body {
 
 #spaceship {
     position: absolute;
+    width: 30px;
+    height: 30px;
+    transform-origin: center center;
+    left: 400px;
+    top: 300px;
+    z-index: 100;
+}
+
+.ship-body {
+    position: absolute;
     width: 0;
     height: 0;
     border-left: 15px solid transparent;
     border-right: 15px solid transparent;
     border-bottom: 30px solid red;
-    transform-origin: center 20px;
-    left: 400px;
-    top: 300px;
-    z-index: 100;
+    top: 0;
+    left: 0;
+}
+
+
+.ship-marker {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background-color: white;
+    border-radius: 50%;
+    top: 0;
+    left: 13px;
 }
 
 .asteroid {
@@ -104,4 +123,47 @@ body {
     right: 10px;
     color: white;
     font-size: 18px;
+}
+
+
+.boss {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-color: #ff3300;
+    border-radius: 50%;
+    border: 2px solid #ffcc00;
+    box-shadow: 0 0 10px #ff3300;
+    z-index: 50;
+}
+
+.boss-projectile {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #ff9900;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #ff9900;
+    z-index: 40;
+}
+
+.boss-health {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.mini-boss {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: #3366ff;
+    border-radius: 50%;
+    border: 2px solid #99ccff;
+    box-shadow: 0 0 8px #3366ff;
+    z-index: 45;
 }

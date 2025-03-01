@@ -7,6 +7,13 @@ class Game {
         this.asteroidCount = 0;
         this.projectiles = [];
         this.asteroids = [];
+        this.bossProjectiles = [];
+        this.boss = null;
+        this.miniBosses = []; 
+        this.bossSpawnThreshold = 100;
+        this.bossActive = false;
+        this.bossDefeated = false;
+        this.miniBossSpawnActive = false; 
 
         this.splashScreen = document.getElementById('splash-screen');
         this.gameScreen = document.getElementById('game-screen');
@@ -15,6 +22,8 @@ class Game {
         this.finalScore = document.getElementById('final-score');
 
         this.spaceship = new Spaceship();
+        
+        window.game = this;
 
         this.handleKeyDown = this.handleKeyDown.bind(this);
         this.handleKeyUp = this.handleKeyUp.bind(this);
@@ -29,11 +38,25 @@ class Game {
         this.score = 0;
         this.projectileCount = 0;
         this.asteroidCount = 0;
+        this.bossActive = false;
+        this.bossDefeated = false;
+        this.miniBossSpawnActive = false;
 
         this.projectiles.forEach(projectile => projectile.remove());
         this.asteroids.forEach(asteroid => asteroid.remove());
+        this.bossProjectiles.forEach(projectile => projectile.remove());
+        
+        if (this.boss) {
+            this.boss.remove();
+            this.boss = null;
+        }
+        
+        this.miniBosses.forEach(miniBoss => miniBoss.remove());
+        this.miniBosses = [];
+        
         this.projectiles = [];
         this.asteroids = [];
+        this.bossProjectiles = [];
 
         this.spaceship.reset();
 
@@ -52,9 +75,48 @@ class Game {
         this.handleInput();
         this.updateProjectiles();
         this.updateAsteroids();
+        
+        if (this.bossActive && this.boss) {
+            this.boss.update();
+        }
+        
+        this.updateMiniBosses();
+        this.updateBossProjectiles();
         this.checkCollisions();
-
+        this.checkBossSpawn();
         requestAnimationFrame(this.gameLoop);
+    }
+    
+    updateMiniBosses() {
+        this.miniBosses.forEach(miniBoss => miniBoss.update());
+    }
+    
+    spawnMiniBoss() {
+        if (!this.active || !this.miniBossSpawnActive) return;
+        
+
+        const miniBoss = MiniBoss.createRandom();
+        this.miniBosses.push(miniBoss);
+        setTimeout(() => this.spawnMiniBoss(), 10000 + Math.random() * 20000); 
+    }
+    
+    startMiniBossSpawning() {
+        
+        if (!this.miniBossSpawnActive) {
+            this.miniBossSpawnActive = true;
+            setTimeout(() => this.spawnMiniBoss(), 5000); 
+        }
+    }
+    
+    checkBossSpawn() {
+        if (!this.bossActive && !this.bossDefeated && this.score >= this.bossSpawnThreshold && !this.boss) {
+            this.spawnBoss();
+        }
+    }
+    
+    spawnBoss() {
+        this.boss = Boss.createRandom();
+        this.bossActive = true;
     }
 
     handleInput() {
@@ -84,6 +146,15 @@ class Game {
             }
         }
     }
+    
+    updateBossProjectiles() {
+        for(let i = this.bossProjectiles.length - 1; i >= 0; i--) {
+            if(!this.bossProjectiles[i].update()) {
+                this.bossProjectiles[i].remove();
+                this.bossProjectiles.splice(i, 1);
+            }
+        }
+    }
 
     spawnAsteroid() {
         if(!this.active) return;
@@ -98,9 +169,12 @@ class Game {
     }
 
     checkCollisions() {
+      
         for(let i = this.projectiles.length - 1; i >= 0; i--) {
             const projectile = this.projectiles[i];
+            let projectileRemoved = false;
 
+            
             for(let j = this.asteroids.length - 1; j >= 0; j--) {
                 const asteroid = this.asteroids[j];
 
@@ -110,6 +184,7 @@ class Game {
 
                     projectile.remove();
                     this.projectiles.splice(i, 1);
+                    projectileRemoved = true;
 
                     this.score += 10;
                     this.scoreDisplay.textContent = `Score: ${this.score}`;
@@ -117,13 +192,80 @@ class Game {
                     break;
                 }
             }
+            
+
+            if (projectileRemoved) continue;
+
+            if (this.bossActive && this.boss) {
+                if (projectile.isColliding(this.boss, this.boss.radius)) {
+                    projectile.remove();
+                    this.projectiles.splice(i, 1);
+                    projectileRemoved = true;
+                    if (!this.boss.hit()) {
+                        this.boss.remove();
+                        this.boss = null;
+                        this.bossActive = false;
+                        this.bossDefeated = true;
+                        this.score += 50; 
+                        this.scoreDisplay.textContent = `Score: ${this.score}`;
+                        this.bossProjectiles.forEach(p => p.remove());
+                        this.bossProjectiles = [];
+                        this.startMiniBossSpawning();
+                    }
+                }
+            }
+            
+            
+            if (projectileRemoved) continue;
+            
+            
+            for(let j = this.miniBosses.length - 1; j >= 0; j--) {
+                const miniBoss = this.miniBosses[j];
+
+                if(projectile.isColliding(miniBoss, miniBoss.radius)) {
+                    projectile.remove();
+                    this.projectiles.splice(i, 1);
+                    projectileRemoved = true;
+                    
+                   
+                    if (!miniBoss.hit()) {
+                        miniBoss.remove();
+                        this.miniBosses.splice(j, 1);
+                        this.score += 25; 
+                        this.scoreDisplay.textContent = `Score: ${this.score}`;
+                    }
+                    break;
+                }
+            }
         }
 
+        
         for(let i = 0; i < this.asteroids.length; i++) {
             const asteroid = this.asteroids[i];
-
             if(this.spaceship.isColliding(asteroid, 30)) {
-                this.gameOver()
+                this.gameOver();
+                break;
+            }
+        }
+        
+       
+        for(let i = 0; i < this.bossProjectiles.length; i++) {
+            const projectile = this.bossProjectiles[i];
+            
+            if(this.spaceship.isColliding(projectile, 15)) {
+                projectile.remove();
+                this.bossProjectiles.splice(i, 1);
+                this.gameOver();
+                break;
+            }
+        }
+        
+        
+        for(let i = 0; i < this.miniBosses.length; i++) {
+            const miniBoss = this.miniBosses[i];
+            
+            if(this.spaceship.isColliding(miniBoss, 25)) {
+                this.gameOver();
                 break;
             }
         }
