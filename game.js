@@ -14,12 +14,17 @@ class Game {
         this.bossActive = false;
         this.bossDefeated = false;
         this.miniBossSpawnActive = false; 
+        this.bestScore = this.getBestScore();
 
         this.splashScreen = document.getElementById('splash-screen');
         this.gameScreen = document.getElementById('game-screen');
         this.gameOverScreen = document.getElementById('game-over-screen');
         this.scoreDisplay = document.getElementById('score-display');
         this.finalScore = document.getElementById('final-score');
+        this.bestScoreDisplay = document.getElementById('best-score-display');
+
+
+        this.updateBestScoreDisplay();
 
         this.spaceship = new Spaceship();
         
@@ -31,6 +36,25 @@ class Game {
 
         document.addEventListener('keydown', this.handleKeyDown);
         document.addEventListener('keyup', this.handleKeyUp);
+    }
+
+
+    getBestScore() {
+        const bestScore = localStorage.getItem('bestScore');
+        return bestScore ? parseInt(bestScore) : 0;
+    }
+
+
+    saveBestScore(score) {
+        localStorage.setItem('bestScore', score.toString());
+        this.bestScore = score;
+    }
+
+
+    updateBestScoreDisplay() {
+        if (this.bestScoreDisplay) {
+            this.bestScoreDisplay.textContent = `Best Score: ${this.bestScore}`;
+        }
     }
 
     start() {
@@ -274,9 +298,21 @@ class Game {
     gameOver() {
         this.active = false;
 
+
+        if (this.score > this.bestScore) {
+            this.saveBestScore(this.score);
+            this.updateBestScoreDisplay();
+        }
+
         this.gameScreen.style.display = 'none';
         this.gameOverScreen.style.display = 'flex';
         this.finalScore.textContent = `FINAL SCORE: ${this.score}`;
+        
+
+        const bestScoreElement = document.getElementById('best-score');
+        if (bestScoreElement) {
+            bestScoreElement.textContent = `BEST SCORE: ${this.bestScore}`;
+        }
     }
 
     handleKeyDown(e) {

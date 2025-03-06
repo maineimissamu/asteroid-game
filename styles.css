@@ -125,6 +125,13 @@ body {
     font-size: 18px;
 }
 
+.best-score {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 10px 0;
+    color: #f44336;
+}
+
 
 .boss {
     position: absolute;
