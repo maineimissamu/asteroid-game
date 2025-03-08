@@ -2,21 +2,19 @@ class Boss extends GameObject {
     constructor(id, x, y) {
         super(id, x, y, 'div', 'boss');
         
-        
         this.health = 6;
         this.projectileCount = 0;
         this.projectiles = [];
         this.shootInterval = null;
         this.radius = 25; 
         
-        
         this.element.style.width = '50px';
         this.element.style.height = '50px';
-        this.element.style.backgroundColor = '#ff3300';
+        this.element.style.backgroundImage = "url('assets/ovni.png')";
+        this.element.style.backgroundSize = '100% 100%';
         this.element.style.borderRadius = '50%';
         this.element.style.border = '2px solid #ffcc00';
-        
-        
+        this.element.style.boxShadow = '0 0 15px #ff3300';
         this.healthIndicator = document.createElement('div');
         this.healthIndicator.className = 'boss-health';
         this.healthIndicator.textContent = this.health;
@@ -30,7 +28,6 @@ class Boss extends GameObject {
         
         this.updatePosition();
         
-       
         this.startShooting();
     }
     
@@ -53,15 +50,12 @@ class Boss extends GameObject {
         const targetX = window.game.spaceship.x;
         const targetY = window.game.spaceship.y;
         
-        
         const directionX = targetX - this.x;
         const directionY = targetY - this.y;
-        
         
         const magnitude = Math.sqrt(directionX * directionX + directionY * directionY);
         const normalizedDirX = directionX / magnitude;
         const normalizedDirY = directionY / magnitude;
-        
         
         const projectile = new BossProjectile(
             `boss-projectile-${this.projectileCount++}`,
@@ -75,18 +69,17 @@ class Boss extends GameObject {
         
         if (window.game) {
             window.game.bossProjectiles.push(projectile);
+            window.game.soundManager.play('projectile');
         }
     }
     
     hit() {
         this.health--;
         this.healthIndicator.textContent = this.health;
-        
-        
-        this.element.style.backgroundColor = '#ff9900';
+        this.element.style.filter = "brightness(1.5)";
         setTimeout(() => {
             if (this.health > 0) {
-                this.element.style.backgroundColor = '#ff3300';
+                this.element.style.filter = "brightness(1)";
             }
         }, 200);
         
@@ -97,7 +90,6 @@ class Boss extends GameObject {
     }
     
     update() {
-        
         for (let i = this.projectiles.length - 1; i >= 0; i--) {
             if (!this.projectiles[i].update()) {
                 this.projectiles[i].remove();
@@ -109,11 +101,9 @@ class Boss extends GameObject {
     remove() {
         this.stopShooting();
         
-        
         this.projectiles.forEach(projectile => projectile.remove());
         
-        
-        this.element.style.backgroundColor = '#ffff00';
+        this.element.style.filter = "brightness(1.5)";
         this.element.style.boxShadow = '0 0 30px #ffff00';
         
         setTimeout(() => {
@@ -122,9 +112,7 @@ class Boss extends GameObject {
     }
     
     static createRandom() {
-        
         const margin = 150; 
-        
         
         let x, y;
         do {
@@ -146,7 +134,6 @@ class BossProjectile extends GameObject {
         this.directionX = directionX;
         this.directionY = directionY;
         this.speed = 5;
-        
         this.element.style.width = '8px';
         this.element.style.height = '8px';
         this.element.style.backgroundColor = '#ff9900';
@@ -161,7 +148,6 @@ class BossProjectile extends GameObject {
         
         this.updatePosition();
         
-       
         if (this.x < 0 || this.x > 800 || this.y < 0 || this.y > 600) {
             return false;
         }

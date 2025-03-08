@@ -15,21 +15,19 @@ class Game {
         this.bossDefeated = false;
         this.miniBossSpawnActive = false; 
         this.bestScore = this.getBestScore();
-
+        this.soundManager = new SoundManager();
         this.splashScreen = document.getElementById('splash-screen');
         this.gameScreen = document.getElementById('game-screen');
         this.gameOverScreen = document.getElementById('game-over-screen');
         this.scoreDisplay = document.getElementById('score-display');
         this.finalScore = document.getElementById('final-score');
         this.bestScoreDisplay = document.getElementById('best-score-display');
-
-
+        this.createMuteButton();
         this.updateBestScoreDisplay();
 
         this.spaceship = new Spaceship();
         
         window.game = this;
-
         this.handleKeyDown = this.handleKeyDown.bind(this);
         this.handleKeyUp = this.handleKeyUp.bind(this);
         this.gameLoop = this.gameLoop.bind(this);
@@ -38,18 +36,37 @@ class Game {
         document.addEventListener('keyup', this.handleKeyUp);
     }
 
+    createMuteButton() {
+        const muteContainer = document.createElement('div');
+        muteContainer.id = 'mute-container';
+        muteContainer.style.position = 'absolute';
+        muteContainer.style.top = '15px';
+        muteContainer.style.left = '15px';
+        muteContainer.style.zIndex = '1000';
+        this.muteButton = document.createElement('button');
+        this.muteButton.id = 'mute-button';
+        this.muteButton.className = 'button';
+        this.muteButton.style.padding = '6px 12px';
+        this.muteButton.style.marginTop = '0';
+        this.muteButton.textContent = '🔊';
+        this.muteButton.addEventListener('click', () => {
+            const isMuted = this.soundManager.toggleMute();
+            this.muteButton.textContent = isMuted ? '🔇' : '🔊';
+        });
+        
+        muteContainer.appendChild(this.muteButton);
+        document.getElementById('game-container').appendChild(muteContainer);
+    }
 
     getBestScore() {
         const bestScore = localStorage.getItem('bestScore');
         return bestScore ? parseInt(bestScore) : 0;
     }
 
-
     saveBestScore(score) {
         localStorage.setItem('bestScore', score.toString());
         this.bestScore = score;
     }
-
 
     updateBestScoreDisplay() {
         if (this.bestScoreDisplay) {
@@ -65,6 +82,7 @@ class Game {
         this.bossActive = false;
         this.bossDefeated = false;
         this.miniBossSpawnActive = false;
+        this.soundManager.startMusic();
 
         this.projectiles.forEach(projectile => projectile.remove());
         this.asteroids.forEach(asteroid => asteroid.remove());
@@ -118,14 +136,12 @@ class Game {
     spawnMiniBoss() {
         if (!this.active || !this.miniBossSpawnActive) return;
         
-
         const miniBoss = MiniBoss.createRandom();
         this.miniBosses.push(miniBoss);
         setTimeout(() => this.spawnMiniBoss(), 10000 + Math.random() * 20000); 
     }
     
     startMiniBossSpawning() {
-        
         if (!this.miniBossSpawnActive) {
             this.miniBossSpawnActive = true;
             setTimeout(() => this.spawnMiniBoss(), 5000); 
@@ -156,7 +172,11 @@ class Game {
         }
 
         if(this.keys[' '] && !this.keys['spaceCooldown']) {
-            this.projectiles.push(this.spaceship.shoot(this.projectileCount++));
+            const projectile = this.spaceship.shoot(this.projectileCount++);
+            this.projectiles.push(projectile);
+            
+            this.soundManager.play('projectile');
+            
             this.keys['spaceCooldown'] = true;
             setTimeout(() => this.keys['spaceCooldown'] = false, 250);
         }
@@ -193,12 +213,10 @@ class Game {
     }
 
     checkCollisions() {
-      
         for(let i = this.projectiles.length - 1; i >= 0; i--) {
             const projectile = this.projectiles[i];
             let projectileRemoved = false;
 
-            
             for(let j = this.asteroids.length - 1; j >= 0; j--) {
                 const asteroid = this.asteroids[j];
 
@@ -209,6 +227,7 @@ class Game {
                     projectile.remove();
                     this.projectiles.splice(i, 1);
                     projectileRemoved = true;
+                    this.soundManager.play('destruction');
 
                     this.score += 10;
                     this.scoreDisplay.textContent = `Score: ${this.score}`;
@@ -217,7 +236,6 @@ class Game {
                 }
             }
             
-
             if (projectileRemoved) continue;
 
             if (this.bossActive && this.boss) {
@@ -230,6 +248,8 @@ class Game {
                         this.boss = null;
                         this.bossActive = false;
                         this.bossDefeated = true;
+                        this.soundManager.play('shipDestruction');
+                        
                         this.score += 50; 
                         this.scoreDisplay.textContent = `Score: ${this.score}`;
                         this.bossProjectiles.forEach(p => p.remove());
@@ -239,9 +259,7 @@ class Game {
                 }
             }
             
-            
             if (projectileRemoved) continue;
-            
             
             for(let j = this.miniBosses.length - 1; j >= 0; j--) {
                 const miniBoss = this.miniBosses[j];
@@ -251,10 +269,12 @@ class Game {
                     this.projectiles.splice(i, 1);
                     projectileRemoved = true;
                     
-                   
                     if (!miniBoss.hit()) {
                         miniBoss.remove();
                         this.miniBosses.splice(j, 1);
+                        
+                        this.soundManager.play('shipDestruction');
+                        
                         this.score += 25; 
                         this.scoreDisplay.textContent = `Score: ${this.score}`;
                     }
@@ -263,7 +283,6 @@ class Game {
             }
         }
 
-        
         for(let i = 0; i < this.asteroids.length; i++) {
             const asteroid = this.asteroids[i];
             if(this.spaceship.isColliding(asteroid, 30)) {
@@ -272,7 +291,6 @@ class Game {
             }
         }
         
-       
         for(let i = 0; i < this.bossProjectiles.length; i++) {
             const projectile = this.bossProjectiles[i];
             
@@ -284,7 +302,7 @@ class Game {
             }
         }
         
-        
+
         for(let i = 0; i < this.miniBosses.length; i++) {
             const miniBoss = this.miniBosses[i];
             
@@ -297,7 +315,10 @@ class Game {
 
     gameOver() {
         this.active = false;
-
+        
+ 
+        this.soundManager.play('shipDestruction');
+        this.soundManager.stopMusic();
 
         if (this.score > this.bestScore) {
             this.saveBestScore(this.score);
@@ -308,7 +329,6 @@ class Game {
         this.gameOverScreen.style.display = 'flex';
         this.finalScore.textContent = `FINAL SCORE: ${this.score}`;
         
-
         const bestScoreElement = document.getElementById('best-score');
         if (bestScoreElement) {
             bestScoreElement.textContent = `BEST SCORE: ${this.bestScore}`;

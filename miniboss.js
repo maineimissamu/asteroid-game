@@ -2,21 +2,18 @@ class MiniBoss extends GameObject {
     constructor(id, x, y) {
         super(id, x, y, 'div', 'mini-boss');
         
-        
         this.health = 2;
         this.projectileCount = 0;
         this.projectiles = [];
         this.shootInterval = null;
         this.radius = 15; 
-        
-        
         this.element.style.width = '30px';
         this.element.style.height = '30px';
-        this.element.style.backgroundColor = '#3366ff'; 
+        this.element.style.backgroundImage = "url('assets/ovni.png')";
+        this.element.style.backgroundSize = '100% 100%';
         this.element.style.borderRadius = '50%';
         this.element.style.border = '2px solid #99ccff';
-        
-        
+        this.element.style.boxShadow = '0 0 12px #3366ff';
         this.healthIndicator = document.createElement('div');
         this.healthIndicator.className = 'boss-health';
         this.healthIndicator.textContent = this.health;
@@ -28,10 +25,7 @@ class MiniBoss extends GameObject {
         this.healthIndicator.style.fontWeight = 'bold';
         this.healthIndicator.style.fontSize = '12px';
         this.element.appendChild(this.healthIndicator);
-        
         this.updatePosition();
-        
-        
         this.startShooting();
     }
     
@@ -53,16 +47,11 @@ class MiniBoss extends GameObject {
         
         const targetX = window.game.spaceship.x;
         const targetY = window.game.spaceship.y;
-        
-        
         const directionX = targetX - this.x;
         const directionY = targetY - this.y;
-        
-        
         const magnitude = Math.sqrt(directionX * directionX + directionY * directionY);
         const normalizedDirX = directionX / magnitude;
         const normalizedDirY = directionY / magnitude;
-        
         
         const projectile = new BossProjectile(
             `mini-boss-projectile-${this.projectileCount++}`,
@@ -76,18 +65,17 @@ class MiniBoss extends GameObject {
         
         if (window.game) {
             window.game.bossProjectiles.push(projectile);
+            window.game.soundManager.play('projectile');
         }
     }
     
     hit() {
         this.health--;
         this.healthIndicator.textContent = this.health;
-        
-        
-        this.element.style.backgroundColor = '#66ccff';
+        this.element.style.filter = "brightness(1.5)";
         setTimeout(() => {
             if (this.health > 0) {
-                this.element.style.backgroundColor = '#3366ff';
+                this.element.style.filter = "brightness(1)";
             }
         }, 200);
         
@@ -98,10 +86,8 @@ class MiniBoss extends GameObject {
     }
     
     update() {
-        
         this.x += (Math.random() - 0.5) * 2;
         this.y += (Math.random() - 0.5) * 2;
-        
         
         if (this.x < 30) this.x = 30;
         if (this.x > 770) this.x = 770;
@@ -110,7 +96,6 @@ class MiniBoss extends GameObject {
         
         this.updatePosition();
         
-       
         for (let i = this.projectiles.length - 1; i >= 0; i--) {
             if (!this.projectiles[i].update()) {
                 this.projectiles[i].remove();
@@ -122,11 +107,9 @@ class MiniBoss extends GameObject {
     remove() {
         this.stopShooting();
         
-        
         this.projectiles.forEach(projectile => projectile.remove());
         
-        
-        this.element.style.backgroundColor = '#99ccff';
+        this.element.style.filter = "brightness(1.5)";
         this.element.style.boxShadow = '0 0 15px #99ccff';
         
         setTimeout(() => {
@@ -135,7 +118,6 @@ class MiniBoss extends GameObject {
     }
     
     static createRandom() {
-       
         const x = 100 + Math.random() * 600;
         const y = 100 + Math.random() * 400;
         

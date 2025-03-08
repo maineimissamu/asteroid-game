@@ -5,10 +5,14 @@ class Projectile extends GameObject {
         this.directionX = directionX;
         this.directionY = directionY;
         this.speed = 10;
-
-        this.element.style.width = '5px';
-        this.element.style.height = '10px';
-        this.element.style.backgroudColor = 'white';
+        this.element.style.width = '4px';
+        this.element.style.height = '12px';
+        this.element.style.backgroundColor = '#64ffda';
+        this.element.style.boxShadow = '0 0 8px 2px #64ffda';
+        this.element.style.borderRadius = '2px';
+        
+        const angle = Math.atan2(directionY, directionX) * (180 / Math.PI) + 90;
+        this.element.style.transform = `rotate(${angle}deg)`;
 
         this.updatePosition();
     }
@@ -25,7 +29,7 @@ class Projectile extends GameObject {
     }
 
     updatePosition() {
-        this.element.style.left = `${this.x - 2.5}px`;
-        this.element.style.top = `${this.y - 5}px`;
+        this.element.style.left = `${this.x - 2}px`;
+        this.element.style.top = `${this.y - 6}px`;
     }
 }
