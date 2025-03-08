@@ -4,17 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Astroblast Game</title>
+    <title>Asteroids Game</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Russo+One&display=swap"
-        rel="stylesheet">
 </head>
 
 <body>
     <div id="game-container">
+
         <div id="splash-screen" class="screen">
-            <div class="title">Astroblast</div>
-            <div id="best-score-display" class="best-score">Best Score: 0</div>
+            <div class="title">Asteroids</div>
             <div class="controls">
                 <p>Rotate Spaceship: Right/Left Arrow Key</p>
                 <p>Move forward: Up Arrow Key</p>
@@ -23,27 +21,29 @@
             <button id="start-button" class="button">Start</button>
         </div>
 
+
         <div id="game-screen" class="screen">
+
             <div id="score-display">Score: 0</div>
         </div>
+
 
         <div id="game-over-screen" class="screen">
             <div class="title">GAME OVER</div>
             <div id="final-score">FINAL SCORE: 0</div>
-            <div id="best-score" class="best-score">BEST SCORE: 0</div>
             <button id="restart-button" class="button">Restart</button>
         </div>
     </div>
 
     <script src="game-object.js"></script>
-    <script src="sound-manager.js"></script>
     <script src="spaceship.js"></script>
     <script src="asteroid.js"></script>
     <script src="projectile.js"></script>
-    <script src="boss.js"></script>
-    <script src="miniboss.js"></script>
     <script src="game.js"></script>
     <script src="main.js"></script>
+    <script src="boss.js"></script>
+    <script src="miniboss.js"></script>
+    <script src="sound-manager.js"></script>
 </body>
 
 </html>

@@ -2,6 +2,7 @@ class SoundManager {
     constructor() {
         this.sounds = {
             projectile: new Audio('assets/projectile-sound-effect.mp3'),
+            destruction: new Audio('assets/destruction.mp3'),
             shipDestruction: new Audio('assets/spaceship-destruction-sound-effect.mp3'),
             music: new Audio('assets/game-music.mp3')
         };
